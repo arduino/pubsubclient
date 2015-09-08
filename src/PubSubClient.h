@@ -109,6 +109,16 @@ public:
    boolean connect(const char* id, const char* user, const char* pass);
    boolean connect(const char* id, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage);
    boolean connect(const char* id, const char* user, const char* pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage);
+ 
+#define HAS_CONNECT_SSL
+
+#ifdef HAS_CONNECT_SSL
+   boolean connect(const char* id, const char* user, const char* pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage, bool useSSL);
+   boolean connectSSL(const char* id);
+   boolean connectSSL(const char* id, const char* user, const char* pass);
+   boolean connectSSL(const char* id, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage);
+   boolean connectSSL(const char* id, const char* user, const char* pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage);
+#endif
    void disconnect();
    boolean publish(const char* topic, const char* payload);
    boolean publish(const char* topic, const uint8_t * payload, unsigned int plength);

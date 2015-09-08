@@ -6,6 +6,9 @@
 
 #include "PubSubClient.h"
 #include "Arduino.h"
+#ifdef HAS_CONNECT_SSL
+#include "WiFiClient.h"
+#endif
 
 PubSubClient::PubSubClient() {
     this->_state = MQTT_DISCONNECTED;
@@ -101,6 +104,33 @@ PubSubClient::PubSubClient(const char* domain, uint16_t port, MQTT_CALLBACK_SIGN
     setStream(stream);
 }
 
+#ifdef HAS_CONNECT_SSL
+boolean PubSubClient::connect(const char *id) {
+    return connect(id,NULL,NULL,0,0,0,0,false);
+}
+
+boolean PubSubClient::connect(const char *id, const char *user, const char *pass) {
+    return connect(id,user,pass,0,0,0,0,false);
+}
+
+boolean PubSubClient::connect(const char *id, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage) {
+    return connect(id,NULL,NULL,willTopic,willQos,willRetain,willMessage,false);
+}
+
+boolean PubSubClient::connectSSL(const char *id) {
+    return connect(id,NULL,NULL,0,0,0,0,true);
+}
+
+boolean PubSubClient::connectSSL(const char *id, const char *user, const char *pass) {
+    return connect(id,user,pass,0,0,0,0,true);
+}
+
+boolean PubSubClient::connectSSL(const char *id, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage) {
+    return connect(id,NULL,NULL,willTopic,willQos,willRetain,willMessage,true);
+}
+
+boolean PubSubClient::connect(const char* id, const char* user, const char* pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage, bool useSSL) {
+#else
 boolean PubSubClient::connect(const char *id) {
     return connect(id,NULL,NULL,0,0,0,0);
 }
@@ -114,14 +144,28 @@ boolean PubSubClient::connect(const char *id, const char* willTopic, uint8_t wil
 }
 
 boolean PubSubClient::connect(const char *id, const char *user, const char *pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage) {
+#endif
     if (!connected()) {
         int result = 0;
 
-        if (domain != NULL) {
-            result = _client->connect(this->domain, this->port);
+#ifdef HAS_CONNECT_SSL
+        if (useSSL) {
+            if (domain != NULL) {
+                result = ((WiFiClient*)_client)->connectSSL(this->domain, this->port);
+            } else {
+                result = ((WiFiClient*)_client)->connectSSL(this->ip, this->port);
+            }
         } else {
-            result = _client->connect(this->ip, this->port);
+#else
+            if (domain != NULL) {
+                result = _client->connect(this->domain, this->port);
+            } else {
+                result = _client->connect(this->ip, this->port);
+            }
+#endif
+#ifdef HAS_CONNECT_SSL
         }
+#endif
         if (result) {
             nextMsgId = 1;
             // Leave room in the buffer for header and variable length field

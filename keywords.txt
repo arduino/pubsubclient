@@ -13,6 +13,7 @@ PubSubClient	KEYWORD1
 #######################################
 
 connect 	KEYWORD2
+connectSSL 	KEYWORD2
 disconnect 	KEYWORD2
 publish 	KEYWORD2
 publish_P 	KEYWORD2
